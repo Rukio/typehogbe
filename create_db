@@ -1,0 +1,99 @@
+CREATE DATABASE typehogdev
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LOCALE_PROVIDER = 'libc'
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
+
+CREATE TABLE roles (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(30),
+    can_edit_paragraphs BOOLEAN NOT NULL,
+    can_delete_paragraphs BOOLEAN NOT NULL,
+    can_edit_scores BOOLEAN NOT NULL,
+    can_delete_scores BOOLEAN NOT NULL,
+    can_edit_sources BOOLEAN NOT NULL,
+    can_delete_sources BOOLEAN NOT NULL,
+    can_edit_roles BOOLEAN NOT NULL,
+    can_delete_roles BOOLEAN NOT NULL,
+    can_edit_users BOOLEAN NOT NULL,
+    can_delete_users BOOLEAN NOT NULL,
+    can_edit_races BOOLEAN NOT NULL,
+    can_delete_races BOOLEAN NOT NULL,
+    created_at NUMERIC(30) NOT NULL,
+    updated_at NUMERIC(30)
+);
+
+CREATE TABLE langs (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(30),
+    img VARCHAR(30),
+    created_at NUMERIC(30) NOT NULL,
+    updated_at NUMERIC(30)
+);
+
+CREATE TABLE sources (
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(100),
+    author VARCHAR(100),
+    img TEXT,
+    created_at NUMERIC(30) NOT NULL,
+    updated_at NUMERIC(30)
+);
+
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(20) NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    country VARCHAR(80),
+    img TEXT,
+    regDate NUMERIC(30) NOT NULL,
+    role_id BIGINT,
+    created_at NUMERIC(30) NOT NULL,
+    updated_at NUMERIC(30)
+);
+
+CREATE TABLE paragraphs (
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    text VARCHAR(3000) NOT NULL,
+    created_at NUMERIC(30) NOT NULL,
+    updated_at NUMERIC(30),
+    source_id BIGINT,
+    lang_id BIGINT,
+    CONSTRAINT source_id_fk FOREIGN KEY(source_id) REFERENCES sources(id),
+    CONSTRAINT lang_id_fk FOREIGN KEY(lang_id) REFERENCES sources(id)
+);
+
+CREATE TABLE races (
+    id BIGSERIAL PRIMARY KEY,
+    paragraph_id BIGINT,
+    created_at NUMERIC(30) NOT NULL,
+    updated_at NUMERIC(30),
+    CONSTRAINT paragraph_id_fk FOREIGN KEY(paragraph_id) REFERENCES paragraphs(id)
+);
+
+CREATE TABLE user_race (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT,
+    race_id BIGINT,
+    created_at NUMERIC(30) NOT NULL,
+    updated_at NUMERIC(30),
+    CONSTRAINT user_id_fk FOREIGN KEY(user_id) REFERENCES users(id),
+    CONSTRAINT race_id_fk FOREIGN KEY(race_id) REFERENCES races(id)
+);
+
+CREATE TABLE scores (
+    id BIGSERIAL PRIMARY KEY,
+    paragraph_id BIGINT,
+    user_id BIGINT,
+    race_id BIGINT,
+    speed NUMERIC(10),
+    timings NUMERIC(10)[],
+    created_at NUMERIC(30) NOT NULL,
+    updated_at NUMERIC(30),
+    CONSTRAINT paragraph_id_fk FOREIGN KEY(paragraph_id) REFERENCES paragraphs(id),
+    CONSTRAINT user_id_fk FOREIGN KEY(user_id) REFERENCES users(id),
+    CONSTRAINT race_id_fk FOREIGN KEY(race_id) REFERENCES races(id)
+);

@@ -1,0 +1,50 @@
+type Country = "Argentina" | "Armenia"; // ...
+type RaceType
+
+interface Source {
+    id: number;
+    title: string;
+    author: string;
+    img: string;
+    createdAt: number;
+    updatedAt: number;
+}
+
+interface Paragraph {
+    id: number;
+    title: string;
+    text: string;
+    source: Source;
+    createdAt: number;
+    updatedAt: number;
+}
+
+interface Race {
+    id: number;
+    users: User[];
+    paragraph: Paragraph;
+    scores: Score[];
+    createdAt: number;
+}
+
+interface Score {
+    id: number;
+    paragraph_id: number;
+    user: User;
+    speed: number; // Letters per minute
+    timings: number[];
+    createdAt: number;
+    updatedAt: number;
+}
+
+interface User {
+    id: number;
+    name: string;
+    email: string;
+    country: Country;
+    scores: Score[];
+    img: string; // url
+    registrationDate: number;
+    createdAt: number;
+    updatedAt: number;
+}
