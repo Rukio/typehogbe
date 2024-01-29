@@ -1,23 +1,29 @@
+type ErrorUtilInfo = Record<string, unknown>;
 export type ErrorUtilValue = {
   code: number;
   message: string;
+	info?: ErrorUtilInfo;
 }
 
 module.exports = {
-  unauthorized: (message: string): ErrorUtilValue => ({
-    code: 400,
-    message,
-  }),
-  badRequest: (message: string): ErrorUtilValue => ({
-    code: 401,
-    message,
-  }),
-  notFound: (message: string): ErrorUtilValue => ({
-    code: 404,
-    message,
-  }),
-  serverError: (message: string): ErrorUtilValue => ({
-    code: 500,
-    message,
-  })
+	unauthorized: (message: string, info?: ErrorUtilInfo): ErrorUtilValue => ({
+		code: 400,
+		message,
+		info,
+	}),
+	badRequest: (message: string, info?: ErrorUtilInfo): ErrorUtilValue => ({
+		code: 401,
+		message,
+		info,
+	}),
+	notFound: (message: string, info?: ErrorUtilInfo): ErrorUtilValue => ({
+		code: 404,
+		message,
+		info,
+	}),
+	serverError: (message: string, info?: ErrorUtilInfo): ErrorUtilValue => ({
+		code: 500,
+		message,
+		info,
+	}),
 };

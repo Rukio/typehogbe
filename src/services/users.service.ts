@@ -7,44 +7,38 @@ const {
 	getUpdate,
 } = require("../utils/service.util");
 
-const tableName = "roles";
-
-export interface RolesServiceType extends SystemDateTypes, SystemIdType {
+export interface UsersServiceType extends SystemDateTypes, SystemIdType {
   name: string,
-  can_edit_paragraphs: boolean,
-  can_delete_paragraphs: boolean,
-  can_edit_scores: boolean,
-  can_delete_scores: boolean,
-  can_edit_sources: boolean,
-  can_delete_sources: boolean,
-  can_edit_roles: boolean,
-  can_delete_roles: boolean,
-  can_edit_users: boolean,
-  can_delete_users: boolean,
-  can_edit_races: boolean,
-  can_delete_races: boolean,
+	email: string,
+	country: string,
+  img: string,
+	regdate: number,
+	role_id: number,
 }
 
-const getOneById = async (id: number): Promise<RolesServiceType | null> => {
+const tableName = "users";
+
+const getOneBy = async (field: string, value: string | number): Promise<UsersServiceType | null> => {
 	const { query: selectQuery, values: selectQueryValues } = getSelectQuery({
 		tableName,
 		filter: {
-			id: String(id),
+			[field]: String(value),
 		},
 	});
-	const data: { rows?: RolesServiceType[] } = await db.query(selectQuery,
+
+	const data: { rows?: UsersServiceType[] } = await db.query(selectQuery,
 		selectQueryValues,
 	);
 
 	return data.rows?.[0] || null;
 };
 
-const getMany = async (queryParams: GetManyParams): Promise<RolesServiceType[]> => {
+const getMany = async (queryParams: GetManyParams): Promise<UsersServiceType[]> => {
 	const { query: selectQuery, values: selectQueryValues } = getSelectQuery({
 		tableName,
 		...queryParams,
 	});
-	const data: { rows?: RolesServiceType[] } = await db.query(    selectQuery,
+	const data: { rows?: UsersServiceType[] } = await db.query(selectQuery,
 		selectQueryValues,
 	);
 
@@ -58,10 +52,10 @@ const create = async (body: BodyPayload) => {
 	});
 	const result: { rowCount: number } = await db.query(query, values);
 
-	let message = `Error creating in ${tableName}`;
+	let message = "Error creating a user";
 
 	if (result.rowCount) {
-		message = "Role created successfully";
+		message = "User created successfully";
 	}
 
 	return { message };
@@ -76,10 +70,10 @@ const update = async (id: number, body: BodyPayload) => {
 
 	const result: { rowCount: number } = await db.query(query, values);
 
-	let message = `Error creating in ${tableName}`;
+	let message = "Error updating a user";
 
 	if (result.rowCount) {
-		message = "Role updated successfully";
+		message = "User updated successfully";
 	}
 
 	return { message };
@@ -91,19 +85,21 @@ const remove = async (id: number) => {
 		[id],
 	);
 
-	let message = `Error deleting ${tableName}`;
+	let message = "Error deleting a user";
 
 	if (result.rowCount) {
-		message = "Role deleted successfully";
+		message = "User deleted successfully";
 	}
 
 	return { message };
 };
 
 module.exports = {
-	getOneById,
+	getOneBy,
 	getMany,
 	create,
 	update,
 	remove,
 };
+
+export {};

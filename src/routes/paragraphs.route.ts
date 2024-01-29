@@ -1,32 +1,31 @@
 const exp = require("express");
 const router = exp.Router();
 
-const controller = require("../controllers/roles.controller");
+const controller = require("../controllers/paragraphs.controller");
 const {
-	CAN_VIEW_ROLES,
-	CAN_EDIT_ROLES,
-	CAN_DELETE_ROLES,
+	CAN_EDIT_PARAGRAPHS,
+	CAN_DELETE_PARAGRAPHS,
 } = require("../configs/roleRights.config");
 
 const roleCheckMiddleware = require("../middleware/roleCheck.middleware");
 const formErrorHandlerMiddleware = require("../middleware/formErrorHandler.middleware");
 
-const formErrorMessage = "Invalid role format";
+const formErrorMessage = "Invalid paragraph format";
 
-router.get("/", roleCheckMiddleware([CAN_VIEW_ROLES]), controller.get);
+router.get("/", controller.get);
 router.post("/",
-	roleCheckMiddleware([CAN_EDIT_ROLES]),
+	roleCheckMiddleware([CAN_EDIT_PARAGRAPHS]),
 	controller.createValidators,
 	formErrorHandlerMiddleware(formErrorMessage),
 	controller.create,
 );
 router.put("/:id",
-	roleCheckMiddleware([CAN_EDIT_ROLES]),
+	roleCheckMiddleware([CAN_EDIT_PARAGRAPHS]),
 	controller.editValidators,
 	formErrorHandlerMiddleware(formErrorMessage),
 	controller.update,
 );
-router.delete("/:id", roleCheckMiddleware([CAN_DELETE_ROLES]), controller.remove);
+router.delete("/:id",roleCheckMiddleware([CAN_DELETE_PARAGRAPHS]), controller.remove);
 
 module.exports = router;
 
