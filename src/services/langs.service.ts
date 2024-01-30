@@ -5,6 +5,7 @@ const {
 	getSelectQuery,
 	getInsertInto,
 	getUpdate,
+	removeById,
 } = require("../utils/service.util");
 
 export interface LangsServiceType extends SystemDateTypes, SystemIdType {
@@ -61,10 +62,7 @@ const update = async (id: number, body: BodyPayload) => {
 };
 
 const remove = async (id: number) => {
-	const result: { rowCount: number } = await db.query(
-		`DELETE FROM ${tableName} WHERE id=$1`,
-		[id],
-	);
+	const result: { rowCount: number } = await removeById(id, tableName);
 
 	let message = "Error deleting a lang";
 

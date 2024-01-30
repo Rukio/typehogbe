@@ -6,6 +6,8 @@ CREATE DATABASE typehogdev
     CONNECTION LIMIT = -1
     IS_TEMPLATE = False;
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE roles (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(30) NOT NULL,
@@ -81,7 +83,12 @@ CREATE TABLE paragraphs (
 
 CREATE TABLE races (
     id BIGSERIAL PRIMARY KEY,
+    uuid UUID NOT NULL DEFAULT uuid_generate_v4(),
     paragraph_id BIGINT,
+    active BOOLEAN NOT NULL,
+    queueable BOOLEAN NOT NULL,
+    personal BOOLEAN NOT NULL,
+    private BOOLEAN NOT NULL,
     created_at NUMERIC(30) NOT NULL,
     updated_at NUMERIC(30),
     CONSTRAINT paragraph_id_fk FOREIGN KEY(paragraph_id) REFERENCES paragraphs(id)

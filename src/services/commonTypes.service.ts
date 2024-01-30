@@ -10,5 +10,5 @@ export interface SystemDateTypes {
 }
 
 export type BodyPayload = Record<string, unknown>;
-export type MessageResponse = Promise<{ message: string }>;
+export type MessageResponse = Promise<{ message: string, data?: { [key: string]: unknown } }>;
 export type GetManyParams = Omit<QueryParams, "tableName">;

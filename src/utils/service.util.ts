@@ -1,3 +1,5 @@
+const db = require("../services/db.service");
+
 export type QueryParams = {
   tableName: string;
   pagination?: {
@@ -11,6 +13,7 @@ export type QueryParams = {
   filter?: {
     [key: string]: string;
   };
+	returning?: string[];
 };
 
 type GetQueryResult = {
@@ -20,6 +23,8 @@ type GetQueryResult = {
 
 type GetInsertInto = {
   tableName: string;
+	returnId?: boolean;
+	returnUuid?: boolean;
   data: {
     [key: string]: any;
   };
@@ -77,8 +82,8 @@ const getOrderBy = (filter: QueryParams["order"]): string => filter ?
 	`ORDER BY ${filter.field}${filter.direction ? ` ${filter.direction.toUpperCase()}` : ""}` :
 	"";
 
-const getSelectQuery = ({ tableName, pagination, order, filter }: QueryParams): GetQueryResult => ({
-	query: `SELECT * FROM ${
+const getSelectQuery = ({ tableName, pagination, order, filter, returning }: QueryParams): GetQueryResult => ({
+	query: `SELECT ${returning ? `${returning.join(",")}` : "*"} FROM ${
 		tableName}${
 		filter ? ` ${getWhere(filter)}` : ""
 	}${
@@ -89,7 +94,7 @@ const getSelectQuery = ({ tableName, pagination, order, filter }: QueryParams): 
 	values: pagination ? [pagination.page, pagination.limit] : null,
 });
 
-const getInsertInto = ({ tableName, data }: GetInsertInto): GetQueryResult => {
+const getInsertInto = ({ tableName, returnId, returnUuid, data }: GetInsertInto): GetQueryResult => {
 	const dataPrepared = {
 		...data,
 		created_at: Date.now(),
@@ -106,7 +111,10 @@ const getInsertInto = ({ tableName, data }: GetInsertInto): GetQueryResult => {
 		.slice(1)
 		.join(", ")
 }
-      )`,
+      )${returnId ? " RETURNING id" : ""
+}${
+	returnId && returnUuid ? ", uuid" : ""
+}`,
 		values: Object.values(dataPrepared),
 	};
 };
@@ -131,8 +139,14 @@ const getUpdate = ({ tableName, id, data }: GetUpdate): GetQueryResult => {
 	};
 };
 
+const removeById = async (id: number, tableName: string) => db.query(
+	`DELETE FROM ${tableName} WHERE id=$1`,
+	[id],
+);
+
 module.exports = {
 	getSelectQuery,
 	getInsertInto,
 	getUpdate,
+	removeById,
 };

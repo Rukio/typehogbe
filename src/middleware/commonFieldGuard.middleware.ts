@@ -6,7 +6,8 @@ module.exports = (req, res, next) => {
 	if (
 		"created_at" in body ||
     "updated_at" in body ||
-		"id" in body
+		"id" in body ||
+		"uuid" in body
 	) {
 		return next(badRequest("Can't modify system properties"));
 	}
