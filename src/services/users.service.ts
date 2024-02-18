@@ -1,4 +1,4 @@
-import {BodyPayload, GetManyParams, SystemDateTypes, SystemIdType} from "./commonTypes.service";
+import {BodyPayload, GetManyParams, MessageResponse, SystemDateTypes, SystemIdType} from "./commonTypes.service";
 
 const db = require("./db.service");
 const {
@@ -6,6 +6,15 @@ const {
 	getInsertInto,
 	getUpdate,
 } = require("../utils/service.util");
+
+export interface UsersServiceRawType {
+	name: string,
+	email: string,
+	country: string,
+	img: string,
+	regdate: number,
+	role_id: number,
+}
 
 export interface UsersServiceType extends SystemDateTypes, SystemIdType {
   name: string,
@@ -45,12 +54,13 @@ const getMany = async (queryParams: GetManyParams): Promise<UsersServiceType[]> 
 	return data.rows;
 };
 
-const create = async (body: BodyPayload) => {
+const create = async (body: BodyPayload): MessageResponse<{ id: string }> => {
 	const { query, values } = getInsertInto({
 		tableName,
+		returnId: true,
 		data: body,
 	});
-	const result: { rowCount: number } = await db.query(query, values);
+	const result: { rowCount: number, rows: { id: string; }[] } = await db.query(query, values);
 
 	let message = "Error creating a user";
 
@@ -58,10 +68,12 @@ const create = async (body: BodyPayload) => {
 		message = "User created successfully";
 	}
 
-	return { message };
+	const resultRows = result.rows;
+
+	return { message, data: { id: resultRows?.[0]?.id} };
 };
 
-const update = async (id: number, body: BodyPayload) => {
+const update = async (id: number, body: BodyPayload): MessageResponse => {
 	const { query, values } = getUpdate({
 		tableName,
 		id,
@@ -79,7 +91,7 @@ const update = async (id: number, body: BodyPayload) => {
 	return { message };
 };
 
-const remove = async (id: number) => {
+const remove = async (id: number): MessageResponse => {
 	const result: { rowCount: number } = await db.query(
 		`DELETE FROM ${tableName} WHERE id=$1`,
 		[id],

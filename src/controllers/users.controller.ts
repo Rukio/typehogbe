@@ -1,3 +1,6 @@
+import {UsersServiceType} from "../services/users.service";
+import {RolesServiceType} from "../services/roles.service";
+
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { check } = require("express-validator");
@@ -39,6 +42,30 @@ const userEditValidators = [
 	imgUrlCheck.optional({ checkFalsy: true }),
 ];
 
+type UserAuthResponseType = Pick<UsersServiceType, "id" | "name" | "email">
+	& {
+		role: RolesServiceType;
+		token: string;
+	};
+
+const getUserResponseByData = (
+	user: Pick<UserAuthResponseType, "id" | "name" | "email">,
+	userRole: RolesServiceType,
+): UserAuthResponseType => {
+	const userJwtObj: Pick<UserAuthResponseType, "id" | "name" | "email" | "role"> = {
+		id: user.id,
+		name: user.name,
+		email: user.email,
+		role: userRole,
+	};
+	const token: string = jwt.sign(userJwtObj, ACCESS_TOKEN_SECRET, { expiresIn: "24h" });
+
+	return {
+		...userJwtObj,
+		token,
+	};
+};
+
 const login = async (req, res, next) => {
 	try {
 		const { email, password } = req.body;
@@ -59,13 +86,7 @@ const login = async (req, res, next) => {
 			return next(error.badRequest(invalidCredsMessage));
 		}
 
-		const userJwtObj = {
-			id: user.id,
-			name: user.name,
-			email: user.email,
-			role: userRole,
-		};
-		const token = jwt.sign(userJwtObj, ACCESS_TOKEN_SECRET, { expiresIn: "24h" });
+		const { token } = getUserResponseByData(user, userRole);
 
 		res.json({ token });
 	} catch (err) {
@@ -87,8 +108,9 @@ const registration = async (req, res, next) => {
 			return next(error.badRequest("User with this email already exist"));
 		}
 
-		const userRole = await rolesService.getMany({ filter: { name: "user" }});
-		const userRoleId = userRole?.[0]?.id;
+		const userRoles = await rolesService.getMany({ filter: { name: "user" }});
+		const userRole = userRoles?.[0];
+		const userRoleId = userRole?.id;
 
 		if (!userRoleId) {
 			return next(error.badRequest("Server error"));
@@ -96,13 +118,19 @@ const registration = async (req, res, next) => {
 
 		const passwordHash = bcrypt.hashSync(password, 8);
 
-		res.json(await service.create({
+		await service.create({
 			name,
 			email,
 			password: passwordHash,
 			role_id: userRoleId,
 			regdate: Date.now(),
-		}));
+		});
+		const newUser = await service.getOneBy("email", email);
+
+		const resultData = getUserResponseByData(newUser, userRole);
+
+		res.json(resultData);
+
 	} catch (err) {
 		console.log("Registration error");
 		next(err);

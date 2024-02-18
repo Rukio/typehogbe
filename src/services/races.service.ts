@@ -14,7 +14,11 @@ const {
 } = require("../utils/service.util");
 
 export interface RacesServiceType extends SystemDateTypes, SystemIdType {
+	uuid: string;
   paragraph_id: number,
+	active: boolean,
+	queueable: boolean,
+	personal: boolean,
 }
 
 const tableName = "races";

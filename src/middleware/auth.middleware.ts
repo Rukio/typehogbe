@@ -22,6 +22,8 @@ module.exports = async (req, res, next) => {
 
 		next();
 	} catch(err) {
+		console.log(req);
+		console.log("Not allowed res");
 		return notAllowedResponse();
 	}
 };

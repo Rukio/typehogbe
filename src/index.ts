@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const WS = require("./socketServer")(app);
 const { PORT } = require("./configs/general.config");
 const raceSocketRouter = require("./routes/raceSockets.route");
@@ -12,9 +13,15 @@ const sourcesRouter = require("./routes/sources.route");
 const usersRouter = require("./routes/users.route");
 const errorHandlerMiddleware = require("./middleware/errorHandler.middleware");
 const commonFieldGuard = require("./middleware/commonFieldGuard.middleware");
-const { heartbeatRaceClients } = require("./utils/sockets.util");
+const {
+	cronHeartbeatRaceClients,
+	cronCloseActiveRaces,
+} = require("./cron");
 
-heartbeatRaceClients(WS);
+app.use(cors());
+
+cronCloseActiveRaces();
+cronHeartbeatRaceClients(WS);
 
 app.use(express.json());
 app.use(commonFieldGuard);
